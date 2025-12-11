@@ -1,0 +1,13 @@
+{
+  "name": "billing-inventory-app",
+  "version": "1.0.0",
+  "description": "Billing system with inventory management (in-memory)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}

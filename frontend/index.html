@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>SmartBill — Billing & Inventory</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="logo-area">
+        <span class="logo-dot"></span>
+        <span class="logo-text">SmartBill</span>
+      </div>
+      <nav class="app-nav">
+        <button class="nav-btn nav-btn-active" data-section="billing">Billing</button>
+        <button class="nav-btn" data-section="inventory">Inventory</button>
+        <button class="nav-btn" data-section="invoices">Invoices</button>
+      </nav>
+    </header>
+
+    <main class="app-grid">
+      <!-- LEFT column -->
+      <aside class="left-col" id="leftCol">
+        <section class="card small-card snapshot-card">
+          <h3 class="card-title">INVENTORY SNAPSHOT</h3>
+          <div class="stat-row"><span>Total Products</span><span id="statTotalProducts" class="stat-value">0</span></div>
+          <div class="stat-row"><span>Low Stock</span><span id="statLowStock" class="stat-value warn">0</span></div>
+        </section>
+
+        <section class="card small-card today-card">
+          <h3 class="card-title">TODAY</h3>
+          <div class="stat-row"><span>Invoices</span><span id="statTodayInvoices" class="stat-value">0</span></div>
+          <div class="stat-row"><span>Revenue</span><span id="statTodayRevenue" class="stat-value">₹0</span></div>
+        </section>
+      </aside>
+
+      <!-- CENTER column -->
+      <section class="center-col">
+        <!-- Billing section -->
+        <section id="section-billing" class="content-section active">
+          <div class="card customer-card">
+            <h2 class="card-heading">CUSTOMER & ITEMS</h2>
+
+            <div class="form-grid">
+              <div class="form-group span-2">
+                <label for="customerName">Customer Name</label>
+                <input id="customerName" placeholder="Walk-in Customer" type="text" />
+              </div>
+              <div class="form-group">
+                <label for="customerMobile">Mobile</label>
+                <input id="customerMobile" placeholder="Optional mobile number" />
+              </div>
+              <div class="form-group">
+                <label for="paymentMode">Payment Mode</label>
+                <select id="paymentMode">
+                  <option value="Cash">Cash</option>
+                  <option value="UPI">UPI</option>
+                  <option value="Card">Card</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="items-row">
+              <div class="form-group">
+                <label for="productSelect">Product</label>
+                <select id="productSelect"></select>
+              </div>
+
+              <div class="form-group">
+                <label for="productBarcode">Barcode</label>
+                <input id="productBarcodeInput" placeholder="Scan or type barcode" />
+              </div>
+
+              <div class="form-group">
+                <label for="itemQuantity">Quantity</label>
+                <input id="itemQuantity" type="number" min="1" value="1" />
+              </div>
+
+              <div class="form-group" style="align-self:end">
+                <button id="btnAddItem" class="primary-btn">+ Add Item</button>
+              </div>
+            </div>
+
+            <div class="split-row">
+              <label class="inline-toggle"><input type="checkbox" id="splitToggle" /> Enable split payments</label>
+              <div style="flex:1"></div>
+              <div class="form-group cash-received-group" style="min-width:260px">
+                <label for="cashReceived">Cash Received</label>
+                <input id="cashReceived" type="number" min="0" step="0.01" placeholder="Amount customer gave" />
+              </div>
+            </div>
+
+            <div class="form-group payments-row" style="margin-top:10px">
+              <label>Payments (split)</label>
+              <div class="payments-controls">
+                <select id="newPaymentMethod" class="small-select">
+                  <option value="Cash">Cash</option>
+                  <option value="UPI">UPI</option>
+                  <option value="Card">Card</option>
+                </select>
+
+                <input id="newPaymentAmount" class="small-input" type="number" placeholder="Amount" />
+                <input id="newPaymentRef" class="flex-input" placeholder="Reference (optional)" />
+                <button id="btnAddPayment" class="ghost-btn" type="button">Add</button>
+              </div>
+
+              <div id="paymentsContainer" class="payments-list" style="margin-top:8px"></div>
+              <div id="paymentMsg" class="info-message"></div>
+            </div>
+          </div>
+
+          <!-- Bill Items -->
+          <div class="card bill-card" id="centerBillCard">
+            <h2 class="card-heading">BILL ITEMS</h2>
+
+            <div class="table-wrapper">
+              <table id="billTable">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th style="width:80px">Qty</th>
+                    <th style="width:110px">Price</th>
+                    <th style="width:90px">Tax</th>
+                    <th style="width:120px">Total</th>
+                    <th style="width:110px"></th>
+                  </tr>
+                </thead>
+                <tbody id="billItemsBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Inventory section -->
+        <section id="section-inventory" class="content-section" style="display:none">
+          <div class="content-header">
+            <h1>Inventory</h1>
+            <p class="subtitle">Manage products and stock levels</p>
+          </div>
+
+          <div class="card">
+            <div class="toolbar" style="display:flex;justify-content:space-between;align-items:center;">
+              <div class="search-group" style="flex:1;max-width:600px;margin-right:12px">
+                <input type="text" id="inventorySearch" placeholder="Search by name or category..." style="width:100%;padding:10px;border-radius:8px;background:#07101a;border:1px solid rgba(255,255,255,0.03)" />
+              </div>
+              <button id="btnOpenProductForm" class="primary-btn">+ Add Product</button>
+            </div>
+
+            <div class="table-wrapper" style="margin-top:12px">
+              <table id="inventoryTable">
+                <thead>
+                  <tr>
+                    <th>Name</th><th>Category</th><th style="width:110px">Price</th><th style="width:90px">Stock</th><th style="width:80px">Unit</th><th style="width:90px">Status</th><th style="width:120px"></th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Invoices section -->
+        <section id="section-invoices" class="content-section" style="display:none">
+          <div class="content-header">
+            <h1>Invoices</h1>
+            <p class="subtitle">View recent billing history</p>
+          </div>
+
+          <div class="card">
+            <div class="table-wrapper">
+              <table id="invoicesTable">
+                <thead>
+                  <tr><th>Invoice #</th><th>Date</th><th>Customer</th><th>Payments</th><th style="width:120px">Net Amount</th></tr>
+                </thead>
+                <tbody id="invoicesTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- RIGHT column (sticky summary) -->
+      <aside class="right-col" id="rightCol">
+        <div class="card bill-card full-height" aria-hidden="true">
+          <h2 class="card-heading">SUMMARY</h2>
+
+          <div class="bill-totals">
+            <div><span>Subtotal</span><span id="billSubtotalRight">₹0</span></div>
+            <div><span>Tax</span><span id="billTaxRight">₹0</span></div>
+            <div><span>Discount</span><span id="billDiscountRight">₹0</span></div>
+            <div class="total-row"><span>Net Payable</span><span id="billNetRight">₹0</span></div>
+            <div><span>Paid</span><span id="billPaidRight">₹0</span></div>
+            <div><span>Change Due</span><span id="changeDueRight">₹0</span></div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:12px;justify-content:flex-end">
+            <button id="rightClearBtn" class="ghost-btn">Clear</button>
+            <button id="rightConfirmBtn" class="primary-btn">Confirm & Save Bill</button>
+          </div>
+          <p id="rightMsg" class="info-message"></p>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Product modal -->
+  <div id="productModal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="productModalTitle">Add Product</h2>
+        <button id="btnCloseProductModal" class="icon-btn" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="productForm">
+          <input type="hidden" id="productId" />
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap:12px;">
+            <div class="form-group"><label for="productName">Name</label><input id="productName" /></div>
+            <div class="form-group"><label for="productCategory">Category</label><input id="productCategory" /></div>
+            <div class="form-group"><label for="productUnit">Unit</label><input id="productUnit" placeholder="pcs/kg" /></div>
+            <div class="form-group"><label for="productPrice">Price</label><input id="productPrice" type="number" step="0.01" /></div>
+            <div class="form-group"><label for="productTax">Tax %</label><input id="productTax" type="number" step="0.01" /></div>
+            <div class="form-group"><label for="productStock">Stock Qty</label><input id="productStock" type="number" /></div>
+            <div class="form-group"><label for="productReorder">Reorder Level</label><input id="productReorder" type="number" /></div>
+            <div class="form-group"><label for="productBarcode">Barcode</label><input id="productBarcode" /></div>
+          </div>
+
+          <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:12px;margin-top:12px">
+            <button id="btnCancelProduct" type="button" class="ghost-btn">Cancel</button>
+            <button type="submit" class="primary-btn">Save</button>
+          </div>
+          <p id="productFormMessage" class="info-message"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden">Saved ✔</div>
+
+  <script src="main.js"></script>
+</body>
+</html>
